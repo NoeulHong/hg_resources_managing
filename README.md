@@ -1,0 +1,129 @@
+# 토도한글 리소스 관리 툴
+
+한국어 리소스의 파일명을 체계적으로 관리하고 생성하는 웹 애플리케이션입니다.
+
+## 🌟 주요 기능
+
+### 📝 파일명 검색 및 생성
+- 텍스트를 입력하면 이미지 파일명과 사운드 파일명을 자동 생성
+- 기존 DB에서 매칭되는 파일명 검색
+- CSV 파일을 통한 대량 처리 지원
+
+### 💾 DB 관리
+- 기존 파일명 데이터베이스 등록 및 관리
+- CSV 업로드를 통한 대량 등록
+- 로컬 저장소에 자동 저장 (브라우저 재접속 시 복원)
+
+### 🎨 구분자 관리
+- 게임별 구분자 등록 및 관리
+- 수동 등록 기능
+- 드롭다운에서 선택 가능
+
+## 🔧 파일명 생성 규칙
+
+### 이미지 파일명
+- 형식: `파일명_구분자.확장자`
+- 예시: `button_puzzle.png`
+
+### 사운드 파일명
+- 형식: `텍스트.mp3`
+- 한글 그대로 유지 (공백은 _ 로 변환)
+- 예시: `안녕_세상.mp3`
+
+## 🚀 사용 방법
+
+1. **파일명 검색**
+   - 텍스트를 입력하거나 CSV 파일 업로드
+   - 게임 구분자와 이미지 확장자 선택
+   - "📁 파일명 생성" 버튼 클릭
+
+2. **DB 관리**
+   - "📂 펼치기" 버튼으로 DB 관리 섹션 열기
+   - CSV 파일 업로드 (형식: 텍스트, 파일명)
+   - 등록된 데이터는 자동으로 로컬 저장소에 저장
+
+3. **구분자 관리**
+   - "📂 펼치기" 버튼으로 구분자 관리 섹션 열기
+   - CSV 파일 업로드 또는 수동 등록
+   - 등록된 구분자는 파일명 검색에서 선택 가능
+
+## 📁 파일 구조
+
+```
+├── todohangul-resource-manager.html  # 메인 애플리케이션
+├── README.md                         # 프로젝트 설명서
+├── .gitignore                        # Git 무시 파일 목록
+├── server.log                        # 서버 로그 (생성 시)
+├── ngrok.log                         # Ngrok 로그 (생성 시)
+└── ngrok                             # Ngrok 바이너리 (생성 시)
+```
+
+## 🖥️ 개발 서버 실행
+
+```bash
+# 로컬 서버 시작
+python3 -m http.server 8000
+
+# 외부 접속을 위한 ngrok 터널 (선택사항)
+./ngrok http 8000
+```
+
+## 💾 데이터 저장
+
+- 모든 DB 데이터는 브라우저의 `localStorage`에 자동 저장
+- 페이지 재접속 시 자동으로 복원
+- 저장 키:
+  - `todohangul_filenameDatabase`: 파일명 DB
+  - `todohangul_separatorDatabase`: 구분자 DB
+
+## 🔄 CSV 파일 형식
+
+### 파일명 DB CSV
+```csv
+텍스트,파일명
+배경 이미지,background
+버튼 아이콘,button
+```
+
+### 구분자 DB CSV
+```csv
+게임 ukey,구분자
+puzzle_game,puzzle
+action_game,action
+```
+
+## 🛠️ 기술 스택
+
+- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
+- **Storage**: Browser localStorage
+- **File Processing**: FileReader API
+- **UI**: 반응형 디자인
+
+## 📋 기능 요구사항
+
+- 모던 웹 브라우저 (Chrome, Firefox, Safari, Edge)
+- JavaScript 활성화 필요
+- 파일 업로드 지원 브라우저
+
+## 🎯 향후 개발 계획
+
+- [ ] 데이터 내보내기/가져오기 기능 개선
+- [ ] 사용자 설정 저장
+- [ ] 파일명 규칙 커스터마이징
+- [ ] 통계 및 분석 기능
+
+## 📝 라이센스
+
+MIT License
+
+## 🤝 기여 방법
+
+1. 이 저장소를 Fork
+2. 새로운 기능 브랜치 생성 (`git checkout -b feature/new-feature`)
+3. 변경사항 커밋 (`git commit -am 'Add new feature'`)
+4. 브랜치에 Push (`git push origin feature/new-feature`)
+5. Pull Request 생성
+
+## 📞 문의
+
+프로젝트 관련 문의사항이나 버그 리포트는 GitHub Issues를 통해 제출해주세요.
