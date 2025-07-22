@@ -307,6 +307,57 @@
             border: 1px solid #c3e6cb;
         }
 
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 15px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #2c3e50;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
@@ -334,6 +385,12 @@
             
             th, td {
                 padding: 10px;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+                padding: 20px;
             }
         }
     </style>
@@ -431,116 +488,14 @@
             </div>
         </div>
 
-        <!-- DB 관리 섹션 -->
-        <div class="input-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="color: #2c3e50; margin: 0;">💾 DB 관리</h2>
-                <button class="btn-secondary" onclick="toggleSection('databaseSection')" id="databaseToggle">📂 펼치기</button>
-            </div>
-            
-            <div id="databaseSection" class="hidden">
-                <div class="form-group">
-                    <label>💾 기존 파일명 DB 등록</label>
-                    <div class="file-upload-area" onclick="document.getElementById('dbFileInput').click()">
-                        <div class="upload-icon">💾</div>
-                        <div class="upload-text">기존 파일명 DB CSV를 업로드하세요</div>
-                        <div class="upload-hint">형식: 텍스트, 파일명 (2열)</div>
-                        <input type="file" id="dbFileInput" class="file-input" accept=".csv" onchange="handleDatabaseUpload(event)">
-                    </div>
-                    <div id="dbPreview" class="csv-preview hidden">
-                        <h4>📋 DB 미리보기</h4>
-                        <table id="dbPreviewTable" class="csv-preview-table"></table>
-                    </div>
-                    <div id="dbUploadMessage"></div>
-                    
-                    <div id="dbStats" class="csv-preview hidden">
-                        <h4>📈 등록된 DB 현황</h4>
-                        <div class="stats">
-                            <div class="stat-card">
-                                <span class="stat-number" id="dbTotalCount">0</span>
-                                <span class="stat-label">등록된 항목 수</span>
-                            </div>
-                            <div class="stat-card">
-                                <span class="stat-number" id="dbUniqueCount">0</span>
-                                <span class="stat-label">고유 파일명 수</span>
-                            </div>
-                        </div>
-                        <div class="button-group">
-                            <button class="btn-secondary" onclick="clearDatabase()">🗑️ DB 초기화</button>
-                            <button class="btn-success" onclick="exportDatabase()">📥 DB 내보내기</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="button-group">
+            <button class="btn-secondary" onclick="openDbModal()" id="dbManageBtn">💾 DB 관리</button>
+            <button class="btn-secondary hidden" onclick="viewDbData()" id="viewDbBtn">📋 등록된 DB 보기</button>
         </div>
 
-        <!-- 구분자 관리 섹션 -->
-        <div class="input-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="color: #2c3e50; margin: 0;">🎨 구분자 관리</h2>
-                <button class="btn-secondary" onclick="toggleSection('separatorSection')" id="separatorToggle">📂 펼치기</button>
-            </div>
-            
-            <div id="separatorSection" class="hidden">
-                <div class="form-group">
-                    <label>🎨 게임 구분자 DB 등록</label>
-                    
-                    <!-- CSV 업로드 영역 -->
-                    <div class="file-upload-area" onclick="document.getElementById('separatorFileInput').click()">
-                        <div class="upload-icon">🎨</div>
-                        <div class="upload-text">구분자 DB CSV를 업로드하세요</div>
-                        <div class="upload-hint">형식: 게임 ukey, 구분자 (2열)</div>
-                        <input type="file" id="separatorFileInput" class="file-input" accept=".csv" onchange="handleSeparatorUpload(event)">
-                    </div>
-                    
-                    <!-- 수동 등록 영역 -->
-                    <div style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 2px solid #e9ecef;">
-                        <h4 style="margin-bottom: 15px; color: #495057;">✏️ 수동 게임 등록</h4>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 15px; align-items: end;">
-                            <div>
-                                <label for="manualGameUkey" style="display: block; margin-bottom: 5px; font-size: 14px;">게임 ukey</label>
-                                <input type="text" id="manualGameUkey" placeholder="예: puzzle_game_01" style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 6px; font-size: 14px;">
-                            </div>
-                            <div>
-                                <label for="manualSeparator" style="display: block; margin-bottom: 5px; font-size: 14px;">구분자</label>
-                                <input type="text" id="manualSeparator" placeholder="예: puzzle" style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 6px; font-size: 14px;">
-                            </div>
-                            <div>
-                                <button onclick="addManualSeparator()" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight: 600;">➕ 추가</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="separatorPreview" class="csv-preview hidden">
-                        <h4>📋 구분자 DB 미리보기</h4>
-                        <table id="separatorPreviewTable" class="csv-preview-table"></table>
-                    </div>
-                    <div id="separatorUploadMessage"></div>
-                    
-                    <div id="separatorStats" class="csv-preview hidden">
-                        <h4>📈 등록된 구분자 현황</h4>
-                        <div class="stats">
-                            <div class="stat-card">
-                                <span class="stat-number" id="separatorTotalCount">0</span>
-                                <span class="stat-label">등록된 게임 수</span>
-                            </div>
-                            <div class="stat-card">
-                                <span class="stat-number" id="separatorUniqueCount">0</span>
-                                <span class="stat-label">고유 구분자 수</span>
-                            </div>
-                        </div>
-                        
-                        <!-- 등록된 게임 목록 -->
-                        <div id="gameListSection" class="hidden" style="margin-top: 20px;">
-                            <h4 style="margin-bottom: 15px; color: #495057;">🎮 등록된 게임 목록</h4>
-                            <div id="gameList" style="max-height: 300px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 8px;"></div>
-                        </div>
-                        <div class="button-group">
-                            <button class="btn-secondary" onclick="clearSeparators()">🗑️ 구분자 초기화</button>
-                            <button class="btn-success" onclick="exportSeparators()">📥 구분자 내보내기</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="button-group">
+            <button class="btn-secondary" onclick="openSeparatorModal()" id="separatorManageBtn">🎨 구분자 관리</button>
+            <button class="btn-secondary hidden" onclick="viewSeparatorData()" id="viewSeparatorBtn">📋 등록된 구분자 보기</button>
         </div>
 
         <div class="results-section hidden" id="resultsSection">
@@ -573,6 +528,138 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
+
+    <!-- DB 관리 모달 -->
+    <div id="dbModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>💾 DB 관리</h2>
+                <span class="close" onclick="closeDbModal()">&times;</span>
+            </div>
+            <div class="form-group">
+                <label>💾 기존 파일명 DB 등록</label>
+                <div class="file-upload-area" onclick="document.getElementById('dbFileInput').click()">
+                    <div class="upload-icon">💾</div>
+                    <div class="upload-text">기존 파일명 DB CSV를 업로드하세요</div>
+                    <div class="upload-hint">형식: 텍스트, 파일명 (2열)</div>
+                    <input type="file" id="dbFileInput" class="file-input" accept=".csv" onchange="handleDatabaseUpload(event)">
+                </div>
+                <div id="dbPreview" class="csv-preview hidden">
+                    <h4>📋 DB 미리보기</h4>
+                    <table id="dbPreviewTable" class="csv-preview-table"></table>
+                </div>
+                <div id="dbUploadMessage"></div>
+                
+                <div id="dbStats" class="csv-preview hidden">
+                    <h4>📈 등록된 DB 현황</h4>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <span class="stat-number" id="dbTotalCount">0</span>
+                            <span class="stat-label">등록된 항목 수</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number" id="dbUniqueCount">0</span>
+                            <span class="stat-label">고유 파일명 수</span>
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn-secondary" onclick="clearDatabase()">🗑️ DB 초기화</button>
+                        <button class="btn-success" onclick="exportDatabase()">📥 DB 내보내기</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 구분자 관리 모달 -->
+    <div id="separatorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🎨 구분자 관리</h2>
+                <span class="close" onclick="closeSeparatorModal()">&times;</span>
+            </div>
+            <div class="form-group">
+                <label>🎨 게임 구분자 DB 등록</label>
+                
+                <!-- CSV 업로드 영역 -->
+                <div class="file-upload-area" onclick="document.getElementById('separatorFileInput').click()">
+                    <div class="upload-icon">🎨</div>
+                    <div class="upload-text">구분자 DB CSV를 업로드하세요</div>
+                    <div class="upload-hint">형식: 게임 ukey, 구분자 (2열)</div>
+                    <input type="file" id="separatorFileInput" class="file-input" accept=".csv" onchange="handleSeparatorUpload(event)">
+                </div>
+                
+                <!-- 수동 등록 영역 -->
+                <div style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 2px solid #e9ecef;">
+                    <h4 style="margin-bottom: 15px; color: #495057;">✏️ 수동 게임 등록</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 15px; align-items: end;">
+                        <div>
+                            <label for="manualGameUkey" style="display: block; margin-bottom: 5px; font-size: 14px;">게임 ukey</label>
+                            <input type="text" id="manualGameUkey" placeholder="예: puzzle_game_01" style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 6px; font-size: 14px;">
+                        </div>
+                        <div>
+                            <label for="manualSeparator" style="display: block; margin-bottom: 5px; font-size: 14px;">구분자</label>
+                            <input type="text" id="manualSeparator" placeholder="예: puzzle" style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 6px; font-size: 14px;">
+                        </div>
+                        <div>
+                            <button onclick="addManualSeparator()" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight: 600;">➕ 추가</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="separatorPreview" class="csv-preview hidden">
+                    <h4>📋 구분자 DB 미리보기</h4>
+                    <table id="separatorPreviewTable" class="csv-preview-table"></table>
+                </div>
+                <div id="separatorUploadMessage"></div>
+                
+                <div id="separatorStats" class="csv-preview hidden">
+                    <h4>📈 등록된 구분자 현황</h4>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <span class="stat-number" id="separatorTotalCount">0</span>
+                            <span class="stat-label">등록된 게임 수</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number" id="separatorUniqueCount">0</span>
+                            <span class="stat-label">고유 구분자 수</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 등록된 게임 목록 -->
+                    <div id="gameListSection" class="hidden" style="margin-top: 20px;">
+                        <h4 style="margin-bottom: 15px; color: #495057;">🎮 등록된 게임 목록</h4>
+                        <div id="gameList" style="max-height: 300px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 8px;"></div>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn-secondary" onclick="clearSeparators()">🗑️ 구분자 초기화</button>
+                        <button class="btn-success" onclick="exportSeparators()">📥 구분자 내보내기</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DB 데이터 보기 모달 -->
+    <div id="dbViewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📋 등록된 DB 데이터</h2>
+                <span class="close" onclick="closeDbViewModal()">&times;</span>
+            </div>
+            <div id="dbViewContent"></div>
+        </div>
+    </div>
+
+    <!-- 구분자 데이터 보기 모달 -->
+    <div id="separatorViewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📋 등록된 구분자 데이터</h2>
+                <span class="close" onclick="closeSeparatorViewModal()">&times;</span>
+            </div>
+            <div id="separatorViewContent"></div>
         </div>
     </div>
 
@@ -623,18 +710,80 @@
         let soundData = []; // 사운드 파일명 데이터
         let searchData = []; // 검색 결과 데이터
 
-        // 섹션 토글 함수
-        function toggleSection(sectionId) {
-            const section = document.getElementById(sectionId);
-            const toggleBtn = document.getElementById(sectionId.replace('Section', 'Toggle'));
-            
-            if (section.classList.contains('hidden')) {
-                section.classList.remove('hidden');
-                toggleBtn.textContent = '📁 접기';
-            } else {
-                section.classList.add('hidden');
-                toggleBtn.textContent = '📂 펼치기';
+        // 모달 관리 함수들
+        function openDbModal() {
+            document.getElementById('dbModal').style.display = 'block';
+        }
+
+        function closeDbModal() {
+            document.getElementById('dbModal').style.display = 'none';
+        }
+
+        function openSeparatorModal() {
+            document.getElementById('separatorModal').style.display = 'block';
+        }
+
+        function closeSeparatorModal() {
+            document.getElementById('separatorModal').style.display = 'none';
+        }
+
+        function viewDbData() {
+            const dbEntries = Object.entries(filenameDatabase);
+            if (dbEntries.length === 0) {
+                alert('등록된 DB 데이터가 없습니다.');
+                return;
             }
+            
+            let html = '<div class="table-container">';
+            html += '<table><thead><tr><th>번호</th><th>텍스트</th><th>파일명</th></tr></thead><tbody>';
+            
+            dbEntries.forEach(([filename, text], index) => {
+                html += `<tr><td>${index + 1}</td><td>${text}</td><td><span class="filename-preview">${filename}</span></td></tr>`;
+            });
+            
+            html += '</tbody></table></div>';
+            
+            document.getElementById('dbViewContent').innerHTML = html;
+            document.getElementById('dbViewModal').style.display = 'block';
+        }
+
+        function closeDbViewModal() {
+            document.getElementById('dbViewModal').style.display = 'none';
+        }
+
+        function viewSeparatorData() {
+            const separatorEntries = Object.entries(separatorDatabase);
+            if (separatorEntries.length === 0) {
+                alert('등록된 구분자 데이터가 없습니다.');
+                return;
+            }
+            
+            let html = '<div class="table-container">';
+            html += '<table><thead><tr><th>번호</th><th>게임 ukey</th><th>구분자</th></tr></thead><tbody>';
+            
+            separatorEntries.forEach(([gameUkey, separator], index) => {
+                html += `<tr><td>${index + 1}</td><td>${gameUkey}</td><td><span class="filename-preview">${separator}</span></td></tr>`;
+            });
+            
+            html += '</tbody></table></div>';
+            
+            document.getElementById('separatorViewContent').innerHTML = html;
+            document.getElementById('separatorViewModal').style.display = 'block';
+        }
+
+        function closeSeparatorViewModal() {
+            document.getElementById('separatorViewModal').style.display = 'none';
+        }
+
+        // 모달 외부 클릭 시 닫기
+        window.onclick = function(event) {
+            const modals = ['dbModal', 'separatorModal', 'dbViewModal', 'separatorViewModal'];
+            modals.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
         }
 
         // DB 저장/로드 함수들
@@ -1041,6 +1190,14 @@
             document.getElementById('dbUniqueCount').textContent = uniqueFilenames;
             
             document.getElementById('dbStats').classList.remove('hidden');
+            
+            // DB 보기 버튼 표시/숨김
+            const viewDbBtn = document.getElementById('viewDbBtn');
+            if (totalCount > 0) {
+                viewDbBtn.classList.remove('hidden');
+            } else {
+                viewDbBtn.classList.add('hidden');
+            }
         }
         
         function clearDatabase() {
@@ -1053,6 +1210,7 @@
                 document.getElementById('dbPreview').classList.add('hidden');
                 document.getElementById('dbStats').classList.add('hidden');
                 document.getElementById('dbFileInput').value = '';
+                document.getElementById('viewDbBtn').classList.add('hidden');
                 showDatabaseMessage('DB가 초기화되었습니다.', 'success');
             }
         }
@@ -1169,6 +1327,14 @@
             document.getElementById('separatorUniqueCount').textContent = uniqueSeparators;
             
             document.getElementById('separatorStats').classList.remove('hidden');
+            
+            // 구분자 보기 버튼 표시/숨김
+            const viewSeparatorBtn = document.getElementById('viewSeparatorBtn');
+            if (totalCount > 0) {
+                viewSeparatorBtn.classList.remove('hidden');
+            } else {
+                viewSeparatorBtn.classList.add('hidden');
+            }
         }
         
         function updateSeparatorDropdown() {
@@ -1306,6 +1472,7 @@
                 document.getElementById('separatorStats').classList.add('hidden');
                 document.getElementById('separatorFileInput').value = '';
                 document.getElementById('gameListSection').classList.add('hidden');
+                document.getElementById('viewSeparatorBtn').classList.add('hidden');
                 updateSeparatorDropdown();
                 showSeparatorMessage('구분자 DB가 초기화되었습니다.', 'success');
             }
