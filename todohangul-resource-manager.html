@@ -484,18 +484,7 @@
             <div class="button-group">
                 <button class="btn-primary" onclick="generateFilenames()">📁 파일명 생성</button>
                 <button class="btn-secondary" onclick="clearAll()">🗑️ 전체 삭제</button>
-                <button class="btn-success hidden" id="downloadBtn" onclick="downloadCSV()">📥 CSV 다운로드</button>
             </div>
-        </div>
-
-        <div class="button-group" style="margin-bottom: 15px;">
-            <button class="btn-secondary" onclick="openDbModal()" id="dbManageBtn">💾 DB 관리</button>
-            <button class="btn-secondary" onclick="openSeparatorModal()" id="separatorManageBtn">🎨 구분자 관리</button>
-        </div>
-        
-        <div class="button-group">
-            <button class="btn-secondary hidden" onclick="viewDbData()" id="viewDbBtn">📋 등록된 DB 보기</button>
-            <button class="btn-secondary hidden" onclick="viewSeparatorData()" id="viewSeparatorBtn">📋 등록된 구분자 보기</button>
         </div>
 
         <div class="results-section hidden" id="resultsSection">
@@ -528,7 +517,17 @@
                     </tbody>
                 </table>
             </div>
+            
+            <div class="button-group" style="margin-top: 20px;">
+                <button class="btn-success" id="downloadBtn" onclick="downloadCSV()">📥 CSV 다운로드</button>
+            </div>
         </div>
+
+        <div class="button-group" style="margin-top: 10px; margin-bottom: 15px;">
+            <button class="btn-secondary" onclick="openDbModal()" id="dbManageBtn">💾 DB 관리</button>
+            <button class="btn-secondary" onclick="openSeparatorModal()" id="separatorManageBtn">🎨 구분자 관리</button>
+        </div>
+        
     </div>
 
     <!-- DB 관리 모달 -->
@@ -546,10 +545,6 @@
                     <div class="upload-hint">형식: 텍스트, 파일명 (2열)</div>
                     <input type="file" id="dbFileInput" class="file-input" accept=".csv" onchange="handleDatabaseUpload(event)">
                 </div>
-                <div id="dbPreview" class="csv-preview hidden">
-                    <h4>📋 DB 미리보기</h4>
-                    <table id="dbPreviewTable" class="csv-preview-table"></table>
-                </div>
                 <div id="dbUploadMessage"></div>
                 
                 <div id="dbStats" class="csv-preview hidden">
@@ -561,12 +556,37 @@
                         </div>
                         <div class="stat-card">
                             <span class="stat-number" id="dbUniqueCount">0</span>
-                            <span class="stat-label">고유 파일명 수</span>
+                            <span class="stat-label">고유 텍스트 수</span>
                         </div>
                     </div>
                     <div class="button-group">
+                        <button class="btn-primary" onclick="showDbDataInModal()">📋 등록된 DB 보기</button>
                         <button class="btn-secondary" onclick="clearDatabase()">🗑️ DB 초기화</button>
                         <button class="btn-success" onclick="exportDatabase()">📥 DB 내보내기</button>
+                    </div>
+                </div>
+                
+                <!-- DB 데이터 보기 섹션 -->
+                <div id="dbDataSection" class="csv-preview hidden">
+                    <h4>📋 등록된 DB 데이터</h4>
+                    <div style="margin-bottom: 15px;">
+                        <input type="text" id="dbModalSearchInput" placeholder="텍스트 또는 파일명으로 검색..." style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 14px;" onkeyup="filterDbDataInModal()">
+                    </div>
+                    <div class="table-container" style="max-height: 400px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>번호</th>
+                                    <th>텍스트</th>
+                                    <th>파일명</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dbModalDataBody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="button-group" style="margin-top: 15px;">
+                        <button class="btn-secondary" onclick="hideDbDataInModal()">← 돌아가기</button>
                     </div>
                 </div>
             </div>
@@ -608,10 +628,6 @@
                         </div>
                     </div>
                 </div>
-                <div id="separatorPreview" class="csv-preview hidden">
-                    <h4>📋 구분자 DB 미리보기</h4>
-                    <table id="separatorPreviewTable" class="csv-preview-table"></table>
-                </div>
                 <div id="separatorUploadMessage"></div>
                 
                 <div id="separatorStats" class="csv-preview hidden">
@@ -626,42 +642,41 @@
                             <span class="stat-label">고유 구분자 수</span>
                         </div>
                     </div>
-                    
-                    <!-- 등록된 게임 목록 -->
-                    <div id="gameListSection" class="hidden" style="margin-top: 20px;">
-                        <h4 style="margin-bottom: 15px; color: #495057;">🎮 등록된 게임 목록</h4>
-                        <div id="gameList" style="max-height: 300px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 8px;"></div>
-                    </div>
                     <div class="button-group">
+                        <button class="btn-primary" onclick="showSeparatorDataInModal()">📋 등록된 구분자 보기</button>
                         <button class="btn-secondary" onclick="clearSeparators()">🗑️ 구분자 초기화</button>
                         <button class="btn-success" onclick="exportSeparators()">📥 구분자 내보내기</button>
+                    </div>
+                </div>
+                
+                <!-- 구분자 데이터 보기 섹션 -->
+                <div id="separatorDataSection" class="csv-preview hidden">
+                    <h4>📋 등록된 구분자 데이터</h4>
+                    <div style="margin-bottom: 15px;">
+                        <input type="text" id="separatorModalSearchInput" placeholder="게임 ukey 또는 구분자로 검색..." style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 14px;" onkeyup="filterSeparatorDataInModal()">
+                    </div>
+                    <div class="table-container" style="max-height: 400px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>번호</th>
+                                    <th>게임 ukey</th>
+                                    <th>구분자</th>
+                                    <th>관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="separatorModalDataBody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="button-group" style="margin-top: 15px;">
+                        <button class="btn-secondary" onclick="hideSeparatorDataInModal()">← 돌아가기</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- DB 데이터 보기 모달 -->
-    <div id="dbViewModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>📋 등록된 DB 데이터</h2>
-                <span class="close" onclick="closeDbViewModal()">&times;</span>
-            </div>
-            <div id="dbViewContent"></div>
-        </div>
-    </div>
-
-    <!-- 구분자 데이터 보기 모달 -->
-    <div id="separatorViewModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>📋 등록된 구분자 데이터</h2>
-                <span class="close" onclick="closeSeparatorViewModal()">&times;</span>
-            </div>
-            <div id="separatorViewContent"></div>
-        </div>
-    </div>
 
     <script>
 
@@ -704,7 +719,7 @@
         }
 
         let csvData = [];
-        let filenameDatabase = {}; // 기존 파일명 데이터베이스
+        let filenameDatabase = []; // 기존 파일명 데이터베이스 (배열로 변경)
         let separatorDatabase = {}; // 미니게임 구분자 데이터베이스
         let searchData = []; // 검색 결과 데이터
 
@@ -725,57 +740,141 @@
             document.getElementById('separatorModal').style.display = 'none';
         }
 
-        function viewDbData() {
-            const dbEntries = Object.entries(filenameDatabase);
-            if (dbEntries.length === 0) {
+        
+
+        // DB 관리 모달 내부에서 DB 데이터 보기
+        function showDbDataInModal() {
+            if (filenameDatabase.length === 0) {
                 alert('등록된 DB 데이터가 없습니다.');
                 return;
             }
             
-            let html = '<div class="table-container">';
-            html += '<table><thead><tr><th>번호</th><th>텍스트</th><th>파일명</th></tr></thead><tbody>';
+            document.getElementById('dbStats').classList.add('hidden');
+            document.getElementById('dbDataSection').classList.remove('hidden');
             
-            dbEntries.forEach(([filename, text], index) => {
-                html += `<tr><td>${index + 1}</td><td>${text}</td><td><span class="filename-preview">${filename}</span></td></tr>`;
+            updateDbModalData();
+        }
+        
+        function hideDbDataInModal() {
+            document.getElementById('dbDataSection').classList.add('hidden');
+            document.getElementById('dbStats').classList.remove('hidden');
+        }
+        
+        function updateDbModalData() {
+            const tbody = document.getElementById('dbModalDataBody');
+            let html = '';
+            
+            filenameDatabase.forEach((item, index) => {
+                html += `<tr><td>${index + 1}</td><td>${item.text}</td><td><span class="filename-preview">${item.filename}</span></td></tr>`;
             });
             
-            html += '</tbody></table></div>';
+            tbody.innerHTML = html;
+        }
+        
+        function filterDbDataInModal() {
+            const searchTerm = document.getElementById('dbModalSearchInput').value.toLowerCase();
+            const tbody = document.getElementById('dbModalDataBody');
             
-            document.getElementById('dbViewContent').innerHTML = html;
-            document.getElementById('dbViewModal').style.display = 'block';
+            if (!tbody) return;
+            
+            let filteredHtml = '';
+            let displayIndex = 1;
+            
+            filenameDatabase.forEach((item, index) => {
+                const textMatch = item.text.toLowerCase().includes(searchTerm);
+                const filenameMatch = item.filename.toLowerCase().includes(searchTerm);
+                
+                if (textMatch || filenameMatch) {
+                    filteredHtml += `<tr><td>${displayIndex}</td><td>${item.text}</td><td><span class="filename-preview">${item.filename}</span></td></tr>`;
+                    displayIndex++;
+                }
+            });
+            
+            tbody.innerHTML = filteredHtml;
         }
 
-        function closeDbViewModal() {
-            document.getElementById('dbViewModal').style.display = 'none';
-        }
-
-        function viewSeparatorData() {
+        // 구분자 관리 모달 내부에서 구분자 데이터 보기
+        function showSeparatorDataInModal() {
             const separatorEntries = Object.entries(separatorDatabase);
             if (separatorEntries.length === 0) {
                 alert('등록된 구분자 데이터가 없습니다.');
                 return;
             }
             
-            let html = '<div class="table-container">';
-            html += '<table><thead><tr><th>번호</th><th>게임 ukey</th><th>구분자</th></tr></thead><tbody>';
+            document.getElementById('separatorStats').classList.add('hidden');
+            document.getElementById('separatorDataSection').classList.remove('hidden');
             
-            separatorEntries.forEach(([gameUkey, separator], index) => {
-                html += `<tr><td>${index + 1}</td><td>${gameUkey}</td><td><span class="filename-preview">${separator}</span></td></tr>`;
+            updateSeparatorModalData();
+        }
+        
+        function hideSeparatorDataInModal() {
+            document.getElementById('separatorDataSection').classList.add('hidden');
+            document.getElementById('separatorStats').classList.remove('hidden');
+        }
+        
+        function updateSeparatorModalData() {
+            const tbody = document.getElementById('separatorModalDataBody');
+            let html = '';
+            let index = 1;
+            
+            Object.entries(separatorDatabase).forEach(([gameUkey, separator]) => {
+                html += `<tr>
+                    <td>${index}</td>
+                    <td>${gameUkey}</td>
+                    <td><span class="filename-preview">${separator}</span></td>
+                    <td><button onclick="removeGameFromModal('${gameUkey}')" style="padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;">✖</button></td>
+                </tr>`;
+                index++;
             });
             
-            html += '</tbody></table></div>';
-            
-            document.getElementById('separatorViewContent').innerHTML = html;
-            document.getElementById('separatorViewModal').style.display = 'block';
+            tbody.innerHTML = html;
         }
-
-        function closeSeparatorViewModal() {
-            document.getElementById('separatorViewModal').style.display = 'none';
+        
+        function filterSeparatorDataInModal() {
+            const searchTerm = document.getElementById('separatorModalSearchInput').value.toLowerCase();
+            const tbody = document.getElementById('separatorModalDataBody');
+            
+            if (!tbody) return;
+            
+            let filteredHtml = '';
+            let displayIndex = 1;
+            
+            Object.entries(separatorDatabase).forEach(([gameUkey, separator]) => {
+                const ukeyMatch = gameUkey.toLowerCase().includes(searchTerm);
+                const separatorMatch = separator.toLowerCase().includes(searchTerm);
+                
+                if (ukeyMatch || separatorMatch) {
+                    filteredHtml += `<tr>
+                        <td>${displayIndex}</td>
+                        <td>${gameUkey}</td>
+                        <td><span class="filename-preview">${separator}</span></td>
+                        <td><button onclick="removeGameFromModal('${gameUkey}')" style="padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;">✖</button></td>
+                    </tr>`;
+                    displayIndex++;
+                }
+            });
+            
+            tbody.innerHTML = filteredHtml;
+        }
+        
+        function removeGameFromModal(gameUkey) {
+            if (confirm(`게임 '${gameUkey}'를 삭제하시겠습니까?`)) {
+                delete separatorDatabase[gameUkey];
+                
+                // localStorage에 저장
+                saveToLocalStorage();
+                
+                updateSeparatorStats();
+                updateSeparatorDropdown();
+                updateSeparatorModalData();
+                
+                showSeparatorMessage(`게임 '${gameUkey}'가 삭제되었습니다.`, 'success');
+            }
         }
 
         // 모달 외부 클릭 시 닫기
         window.onclick = function(event) {
-            const modals = ['dbModal', 'separatorModal', 'dbViewModal', 'separatorViewModal'];
+            const modals = ['dbModal', 'separatorModal'];
             modals.forEach(modalId => {
                 const modal = document.getElementById(modalId);
                 if (event.target === modal) {
@@ -801,8 +900,18 @@
                 const savedSeparatorDB = localStorage.getItem('todohangul_separatorDatabase');
                 
                 if (savedFilenameDB) {
-                    filenameDatabase = JSON.parse(savedFilenameDB);
-                    console.log('Filename DB loaded from localStorage:', Object.keys(filenameDatabase).length, 'items');
+                    const parsed = JSON.parse(savedFilenameDB);
+                    // 이전 객체 구조와의 호환성 유지
+                    if (Array.isArray(parsed)) {
+                        filenameDatabase = parsed;
+                    } else {
+                        // 객체에서 배열로 변환
+                        filenameDatabase = Object.entries(parsed).map(([filename, text]) => ({
+                            text: text,
+                            filename: filename
+                        }));
+                    }
+                    console.log('Filename DB loaded from localStorage:', filenameDatabase.length, 'items');
                     updateDatabaseStats();
                 }
                 
@@ -811,7 +920,6 @@
                     console.log('Separator DB loaded from localStorage:', Object.keys(separatorDatabase).length, 'items');
                     updateSeparatorDropdown();
                     updateSeparatorStats();
-                    updateGameList();
                 }
             } catch (error) {
                 console.error('Error loading from localStorage:', error);
@@ -1003,7 +1111,6 @@
             });
             
             document.getElementById('resultsSection').classList.remove('hidden');
-            document.getElementById('downloadBtn').classList.remove('hidden');
         }
 
         function updateStats(results) {
@@ -1055,7 +1162,6 @@
         
         function clearResults() {
             document.getElementById('resultsSection').classList.add('hidden');
-            document.getElementById('downloadBtn').classList.add('hidden');
         }
 
         function downloadCSV() {
@@ -1121,13 +1227,15 @@
                     
                     // 기존 DB에 추가
                     parsed.forEach(item => {
-                        filenameDatabase[item.filename] = item.text;
+                        filenameDatabase.push({
+                            text: item.text,
+                            filename: item.filename
+                        });
                     });
                     
                     // localStorage에 저장
                     saveToLocalStorage();
                     
-                    showDatabasePreview(parsed);
                     updateDatabaseStats();
                     showDatabaseMessage(`${parsed.length}개의 항목을 DB에 추가했습니다.`, 'success');
                     
@@ -1139,25 +1247,6 @@
             reader.readAsText(file, 'UTF-8');
         }
         
-        function showDatabasePreview(data) {
-            const preview = document.getElementById('dbPreview');
-            const table = document.getElementById('dbPreviewTable');
-            
-            let html = '<thead><tr><th>번호</th><th>텍스트</th><th>파일명</th></tr></thead><tbody>';
-            
-            const previewCount = Math.min(data.length, 10);
-            for (let i = 0; i < previewCount; i++) {
-                html += `<tr><td>${i + 1}</td><td>${data[i].text}</td><td><span class="filename-preview">${data[i].filename}</span></td></tr>`;
-            }
-            
-            if (data.length > 10) {
-                html += `<tr><td colspan="3" style="text-align: center; font-style: italic;">... 및 ${data.length - 10}개 항목 더</td></tr>`;
-            }
-            
-            html += '</tbody>';
-            table.innerHTML = html;
-            preview.classList.remove('hidden');
-        }
         
         function showDatabaseMessage(message, type) {
             const messageDiv = document.getElementById('dbUploadMessage');
@@ -1171,50 +1260,39 @@
         }
         
         function updateDatabaseStats() {
-            const totalCount = Object.keys(filenameDatabase).length;
-            const uniqueFilenames = new Set(Object.keys(filenameDatabase)).size;
+            const totalCount = filenameDatabase.length;
+            const uniqueTexts = new Set(filenameDatabase.map(item => item.text)).size;
             
             document.getElementById('dbTotalCount').textContent = totalCount;
-            document.getElementById('dbUniqueCount').textContent = uniqueFilenames;
+            document.getElementById('dbUniqueCount').textContent = uniqueTexts;
             
             document.getElementById('dbStats').classList.remove('hidden');
-            
-            // DB 보기 버튼 표시/숨김
-            const viewDbBtn = document.getElementById('viewDbBtn');
-            if (totalCount > 0) {
-                viewDbBtn.classList.remove('hidden');
-                viewDbBtn.innerHTML = `📋 등록된 DB 보기 (${totalCount})`;
-            } else {
-                viewDbBtn.classList.add('hidden');
-            }
         }
         
         function clearDatabase() {
             if (confirm('등록된 모든 DB 데이터를 삭제하시겠습니까?')) {
-                filenameDatabase = {};
+                filenameDatabase = [];
                 
                 // localStorage에서도 삭제
                 saveToLocalStorage();
                 
-                document.getElementById('dbPreview').classList.add('hidden');
                 document.getElementById('dbStats').classList.add('hidden');
+                document.getElementById('dbDataSection').classList.add('hidden');
                 document.getElementById('dbFileInput').value = '';
-                document.getElementById('viewDbBtn').classList.add('hidden');
                 showDatabaseMessage('DB가 초기화되었습니다.', 'success');
             }
         }
         
         function exportDatabase() {
-            const dbEntries = Object.entries(filenameDatabase);
-            if (dbEntries.length === 0) {
+            if (filenameDatabase.length === 0) {
                 alert('내보낼 DB 데이터가 없습니다.');
                 return;
             }
             
             let csv = '텍스트,파일명\n';
-            dbEntries.forEach(([filename, text]) => {
-                const escapedText = text.includes(',') ? `"${text}"` : text;
-                const escapedFilename = filename.includes(',') ? `"${filename}"` : filename;
+            filenameDatabase.forEach((item) => {
+                const escapedText = item.text.includes(',') ? `"${item.text}"` : item.text;
+                const escapedFilename = item.filename.includes(',') ? `"${item.filename}"` : item.filename;
                 csv += `${escapedText},${escapedFilename}\n`;
             });
             
@@ -1263,10 +1341,8 @@
                     // localStorage에 저장
                     saveToLocalStorage();
                     
-                    showSeparatorPreview(parsed);
                     updateSeparatorStats();
                     updateSeparatorDropdown();
-                    updateGameList();
                     showSeparatorMessage(`${parsed.length}개의 구분자를 DB에 추가했습니다.`, 'success');
                     
                 } catch (error) {
@@ -1277,25 +1353,6 @@
             reader.readAsText(file, 'UTF-8');
         }
         
-        function showSeparatorPreview(data) {
-            const preview = document.getElementById('separatorPreview');
-            const table = document.getElementById('separatorPreviewTable');
-            
-            let html = '<thead><tr><th>번호</th><th>게임 ukey</th><th>구분자</th></tr></thead><tbody>';
-            
-            const previewCount = Math.min(data.length, 10);
-            for (let i = 0; i < previewCount; i++) {
-                html += `<tr><td>${i + 1}</td><td>${data[i].text}</td><td><span class="filename-preview">${data[i].filename}</span></td></tr>`;
-            }
-            
-            if (data.length > 10) {
-                html += `<tr><td colspan="3" style="text-align: center; font-style: italic;">... 및 ${data.length - 10}개 항목 더</td></tr>`;
-            }
-            
-            html += '</tbody>';
-            table.innerHTML = html;
-            preview.classList.remove('hidden');
-        }
         
         function showSeparatorMessage(message, type) {
             const messageDiv = document.getElementById('separatorUploadMessage');
@@ -1316,15 +1373,6 @@
             document.getElementById('separatorUniqueCount').textContent = uniqueSeparators;
             
             document.getElementById('separatorStats').classList.remove('hidden');
-            
-            // 구분자 보기 버튼 표시/숨김
-            const viewSeparatorBtn = document.getElementById('viewSeparatorBtn');
-            if (totalCount > 0) {
-                viewSeparatorBtn.classList.remove('hidden');
-                viewSeparatorBtn.innerHTML = `📋 등록된 구분자 보기 (${totalCount})`;
-            } else {
-                viewSeparatorBtn.classList.add('hidden');
-            }
         }
         
         function updateSeparatorDropdown() {
@@ -1370,32 +1418,6 @@
             }
         }
         
-        function updateGameList() {
-            const gameListSection = document.getElementById('gameListSection');
-            const gameList = document.getElementById('gameList');
-            
-            const games = Object.entries(separatorDatabase);
-            if (games.length === 0) {
-                gameListSection.classList.add('hidden');
-                return;
-            }
-            
-            let html = '';
-            games.forEach(([gameUkey, separator]) => {
-                html += `
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #e9ecef; background: white;">
-                        <div>
-                            <span style="font-weight: 600; color: #495057;">${gameUkey}</span>
-                            <span style="margin-left: 10px; padding: 4px 8px; background: #e9ecef; border-radius: 4px; font-family: monospace; font-size: 12px;">${separator}</span>
-                        </div>
-                        <button onclick="removeGame('${gameUkey}')" style="padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;">✖</button>
-                    </div>
-                `;
-            });
-            
-            gameList.innerHTML = html;
-            gameListSection.classList.remove('hidden');
-        }
         
         function addManualSeparator() {
             const gameUkey = document.getElementById('manualGameUkey').value.trim();
@@ -1448,7 +1470,6 @@
                 
                 updateSeparatorStats();
                 updateSeparatorDropdown();
-                updateGameList();
                 
                 showSeparatorMessage(`게임 '${gameUkey}'가 삭제되었습니다.`, 'success');
             }
@@ -1461,11 +1482,9 @@
                 // localStorage에서도 삭제
                 saveToLocalStorage();
                 
-                document.getElementById('separatorPreview').classList.add('hidden');
                 document.getElementById('separatorStats').classList.add('hidden');
+                document.getElementById('separatorDataSection').classList.add('hidden');
                 document.getElementById('separatorFileInput').value = '';
-                document.getElementById('gameListSection').classList.add('hidden');
-                document.getElementById('viewSeparatorBtn').classList.add('hidden');
                 updateSeparatorDropdown();
                 showSeparatorMessage('구분자 DB가 초기화되었습니다.', 'success');
             }
@@ -1606,9 +1625,9 @@
                 let dbStatus = 'DB 없음';
                 
                 // 정확히 매칭되는 텍스트 찾기
-                for (const [filename, text] of Object.entries(filenameDatabase)) {
-                    if (text.toLowerCase() === originalText.toLowerCase()) {
-                        baseFilename = filename;
+                for (const item of filenameDatabase) {
+                    if (item.text.toLowerCase() === originalText.toLowerCase()) {
+                        baseFilename = item.filename;
                         dbStatus = 'DB 매칭';
                         break;
                     }
@@ -1768,7 +1787,6 @@
             });
             
             document.getElementById('resultsSection').classList.remove('hidden');
-            document.getElementById('downloadBtn').classList.remove('hidden');
             
             // 통계 업데이트
             updateSearchStats(results);
@@ -1811,9 +1829,9 @@
                 
                 // DB에서 검색
                 let baseFilename = null;
-                for (const [filename, text] of Object.entries(filenameDatabase)) {
-                    if (text.toLowerCase() === trimmed.toLowerCase()) {
-                        baseFilename = filename;
+                for (const item of filenameDatabase) {
+                    if (item.text.toLowerCase() === trimmed.toLowerCase()) {
+                        baseFilename = item.filename;
                         break;
                     }
                 }
