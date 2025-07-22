@@ -488,9 +488,12 @@
             </div>
         </div>
 
-        <div class="button-group">
+        <div class="button-group" style="margin-bottom: 15px;">
             <button class="btn-secondary" onclick="openDbModal()" id="dbManageBtn">💾 DB 관리</button>
             <button class="btn-secondary" onclick="openSeparatorModal()" id="separatorManageBtn">🎨 구분자 관리</button>
+        </div>
+        
+        <div class="button-group">
             <button class="btn-secondary hidden" onclick="viewDbData()" id="viewDbBtn">📋 등록된 DB 보기</button>
             <button class="btn-secondary hidden" onclick="viewSeparatorData()" id="viewSeparatorBtn">📋 등록된 구분자 보기</button>
         </div>
@@ -703,8 +706,6 @@
         let csvData = [];
         let filenameDatabase = {}; // 기존 파일명 데이터베이스
         let separatorDatabase = {}; // 미니게임 구분자 데이터베이스
-        let imageData = []; // 이미지 파일명 데이터
-        let soundData = []; // 사운드 파일명 데이터
         let searchData = []; // 검색 결과 데이터
 
         // 모달 관리 함수들
@@ -951,25 +952,30 @@
         }
 
         function generateFilenames() {
-            let lines = [];
-            
-            // 수동 입력 데이터 가져오기
-            const manualInput = document.getElementById('searchTextInput').value;
-            if (manualInput.trim()) {
-                lines = manualInput.split('\n').filter(line => line.trim() !== '');
+            try {
+                let lines = [];
+                
+                // 수동 입력 데이터 가져오기
+                const searchInput = document.getElementById('searchTextInput');
+                if (searchInput && searchInput.value.trim()) {
+                    lines = searchInput.value.split('\n').filter(line => line.trim() !== '');
+                }
+                
+                // CSV 데이터 추가
+                if (csvData.length > 0) {
+                    lines = lines.concat(csvData);
+                }
+                
+                if (lines.length === 0) {
+                    alert('리소스 텍스트를 입력하거나 CSV 파일을 업로드해주세요.');
+                    return;
+                }
+                
+                return generateSearchResults(lines);
+            } catch (error) {
+                console.error('파일명 생성 중 오류:', error);
+                alert('파일명 생성 중 오류가 발생했습니다. 콘솔을 확인해주세요.');
             }
-            
-            // CSV 데이터 추가
-            if (csvData.length > 0) {
-                lines = lines.concat(csvData);
-            }
-            
-            if (lines.length === 0) {
-                alert('리소스 텍스트를 입력하거나 CSV 파일을 업로드해주세요.');
-                return;
-            }
-            
-            return generateSearchResults(lines);
         }
         
         
@@ -1041,23 +1047,8 @@
             document.getElementById('manualGameUkey').value = '';
             document.getElementById('manualSeparator').value = '';
             
-            // 이미지 관련 초기화
-            document.getElementById('imageTextInput').value = '';
-            document.getElementById('imagePreviewSection').classList.add('hidden');
-            imageData = [];
-            
-            // 구분자 선택 초기화
-            document.getElementById('separatorSelect').selectedIndex = 0;
-            document.getElementById('extensionSelect').selectedIndex = 0;
-            
             // 검색 관련 초기화
-            document.getElementById('searchTextInput').value = '';
-            document.getElementById('searchPreviewSection').classList.add('hidden');
             searchData = [];
-            
-            // 구분자 선택 초기화
-            document.getElementById('searchSeparatorSelect').selectedIndex = 0;
-            document.getElementById('searchExtensionSelect').selectedIndex = 0;
             
             clearResults();
         }
@@ -1337,43 +1328,46 @@
         }
         
         function updateSeparatorDropdown() {
-            console.log('updateSeparatorDropdown called');
-            const select = document.getElementById('searchSeparatorSelect');
-            
-            if (!select) {
-                console.log('searchSeparatorSelect not found');
-                return;
+            try {
+                const select = document.getElementById('searchSeparatorSelect');
+                
+                if (!select) {
+                    console.warn('searchSeparatorSelect element not found');
+                    return;
+                }
+                
+                // 기존 옵션 제거 (첫 번째와 마지막 "수동 입력..." 제외)
+                const firstOption = select.children[0]; // "구분자를 선택하세요"
+                const manualOption = select.querySelector('[value="__manual__"]'); // "수동 입력..."
+                
+                // 모든 옵션 제거
+                select.innerHTML = '';
+                
+                // 기본 옵션 다시 추가
+                if (firstOption) {
+                    select.appendChild(firstOption);
+                }
+                
+                // 구분자 옵션 추가
+                Object.entries(separatorDatabase).forEach(([gameUkey, separator]) => {
+                    const option = document.createElement('option');
+                    option.value = separator;
+                    option.textContent = `${gameUkey} (${separator})`;
+                    select.appendChild(option);
+                });
+                
+                // "수동 입력..." 옵션 다시 추가
+                if (manualOption) {
+                    select.appendChild(manualOption);
+                } else {
+                    const newManualOption = document.createElement('option');
+                    newManualOption.value = '__manual__';
+                    newManualOption.textContent = '수동 입력...';
+                    select.appendChild(newManualOption);
+                }
+            } catch (error) {
+                console.error('구분자 드롭다운 업데이트 중 오류:', error);
             }
-            
-            // 기존 옵션 제거 (첫 번째와 마지막 "수동 입력..." 제외)
-            const firstOption = select.children[0]; // "구분자를 선택하세요"
-            const manualOption = select.querySelector('[value="__manual__"]'); // "수동 입력..."
-            
-            // 모든 옵션 제거
-            select.innerHTML = '';
-            
-            // 기본 옵션 다시 추가
-            select.appendChild(firstOption);
-            
-            // 구분자 옵션 추가
-            Object.entries(separatorDatabase).forEach(([gameUkey, separator]) => {
-                const option = document.createElement('option');
-                option.value = separator;
-                option.textContent = `${gameUkey} (${separator})`;
-                select.appendChild(option);
-            });
-            
-            // "수동 입력..." 옵션 다시 추가
-            if (manualOption) {
-                select.appendChild(manualOption);
-            } else {
-                const newManualOption = document.createElement('option');
-                newManualOption.value = '__manual__';
-                newManualOption.textContent = '수동 입력...';
-                select.appendChild(newManualOption);
-            }
-            
-            console.log('Dropdown updated, total options:', select.children.length);
         }
         
         function updateGameList() {
@@ -1528,10 +1522,13 @@
             if (files.length > 0) {
                 const file = files[0];
                 if (file.name.toLowerCase().endsWith('.csv')) {
-                    document.getElementById('csvFileInput').files = files;
-                    handleFileSelect({ target: { files: [file] } });
+                    const searchCsvInput = document.getElementById('searchCsvInput');
+                    if (searchCsvInput) {
+                        searchCsvInput.files = files;
+                        handleSearchCsvUpload({ target: { files: [file] } });
+                    }
                 } else {
-                    showMessage('CSV 파일만 업로드 가능합니다.', 'error');
+                    showSearchCsvMessage('CSV 파일만 업로드 가능합니다.', 'error');
                 }
             }
         });
@@ -1798,7 +1795,6 @@
             const extension = document.getElementById('searchExtensionSelect').value;
             
             if (!text.trim() || !separator) {
-                document.getElementById('searchPreviewSection').classList.add('hidden');
                 return;
             }
             
@@ -1840,88 +1836,38 @@
             }
             html += '</div>';
             
-            previewDiv.innerHTML = html;
-            document.getElementById('searchPreviewSection').classList.remove('hidden');
+            if (previewDiv) {
+                previewDiv.innerHTML = html;
+            }
         }
         
         // 이벤트 리스너 추가
         document.addEventListener('DOMContentLoaded', function() {
-            const searchTextInput = document.getElementById('searchTextInput');
-            const searchSeparatorSelect = document.getElementById('searchSeparatorSelect');
-            const searchExtensionSelect = document.getElementById('searchExtensionSelect');
-            
-            if (searchTextInput) {
-                searchTextInput.addEventListener('input', updateSearchPreview);
-            }
-            if (searchSeparatorSelect) {
-                searchSeparatorSelect.addEventListener('change', updateSearchPreview);
-            }
-            if (searchExtensionSelect) {
-                searchExtensionSelect.addEventListener('change', updateSearchPreview);
+            try {
+                const searchTextInput = document.getElementById('searchTextInput');
+                const searchSeparatorSelect = document.getElementById('searchSeparatorSelect');
+                const searchExtensionSelect = document.getElementById('searchExtensionSelect');
+                
+                if (searchTextInput) {
+                    searchTextInput.addEventListener('input', updateSearchPreview);
+                    searchTextInput.addEventListener('keydown', function(e) {
+                        if (e.ctrlKey && e.key === 'Enter') {
+                            generateFilenames();
+                        }
+                    });
+                }
+                if (searchSeparatorSelect) {
+                    searchSeparatorSelect.addEventListener('change', updateSearchPreview);
+                }
+                if (searchExtensionSelect) {
+                    searchExtensionSelect.addEventListener('change', updateSearchPreview);
+                }
+            } catch (error) {
+                console.error('이벤트 리스너 등록 중 오류:', error);
             }
         });
         
-        document.getElementById('searchTextInput').addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.key === 'Enter') {
-                generateFilenames();
-            }
-        });
         
-        // 검색 파일명 실시간 미리보기
-        document.getElementById('searchTextInput').addEventListener('input', updateSearchPreview);
-        document.getElementById('searchSeparatorSelect').addEventListener('change', updateSearchPreview);
-        document.getElementById('searchExtensionSelect').addEventListener('change', updateSearchPreview);
-        
-        function updateSearchPreview() {
-            const text = document.getElementById('searchTextInput').value;
-            const separator = document.getElementById('searchSeparatorSelect').value;
-            const extension = document.getElementById('searchExtensionSelect').value;
-            
-            if (!text.trim() || !separator) {
-                document.getElementById('searchPreviewSection').classList.add('hidden');
-                return;
-            }
-            
-            const lines = text.split('\n').filter(line => line.trim() !== '');
-            const previewDiv = document.getElementById('searchFilenamePreview');
-            
-            let html = '<div style="max-height: 200px; overflow-y: auto; font-size: 12px;">';
-            html += '<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 10px; background: #e9ecef; border-radius: 4px; font-weight: 600;">';
-            html += '<div>기본 파일명</div><div>이미지 파일명</div><div>사운드 파일명</div>';
-            html += '</div>';
-            
-            lines.slice(0, 5).forEach((line, index) => {
-                const trimmed = line.trim();
-                
-                // DB에서 검색
-                let baseFilename = null;
-                for (const [filename, text] of Object.entries(filenameDatabase)) {
-                    if (text.toLowerCase() === trimmed.toLowerCase()) {
-                        baseFilename = filename;
-                        break;
-                    }
-                }
-                
-                if (!baseFilename) {
-                    baseFilename = generateFilename(trimmed);
-                }
-                
-                const imageFilename = `${baseFilename}_${separator}.${extension}`;
-                const soundFilename = generateSoundFilename(trimmed);
-                
-                html += '<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 8px; background: #f8f9fa; border-radius: 4px; margin: 5px 0; font-family: monospace;">';
-                html += `<div>${baseFilename}</div><div>${imageFilename}</div><div>${soundFilename}</div>`;
-                html += '</div>';
-            });
-            
-            if (lines.length > 5) {
-                html += `<div style="text-align: center; font-style: italic; color: #6c757d; padding: 10px;">... 및 ${lines.length - 5}개 더</div>`;
-            }
-            html += '</div>';
-            
-            previewDiv.innerHTML = html;
-            document.getElementById('searchPreviewSection').classList.remove('hidden');
-        }
     </script>
 </body>
 </html>
